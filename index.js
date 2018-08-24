@@ -85,9 +85,20 @@ or CTRL + C to close the program`);
     
     var command = readlineSync.prompt();
     
-    if (command == 'List Transactions') {
+    if (command === 'List Transactions') {
         transactions2014.forEach(element => element.displayTransaction());
-    } else if (command == 'List All') {
+    } else if (command === 'List All') {
         persons2014.forEach(element => element.displayPerson());
-    }
+    } else {
+        const name = command.slice(5);
+        const account = persons.find(person => person.name === name).account.toFixed(2);
+        const requestedPersonsTransactions = transactions2014.filter(transaction => {if (transaction.from === name || transaction.to === name) {return true}});
+        if (account > 0) {
+            console.log(`${name} is owed ${account}`);
+        } else {
+            console.log(`${name} owes ${Math.abs(account)}`);
+        }
+        console.log(`Here are ${name}'s transactions: \n`);
+        requestedPersonsTransactions.forEach(transaction => transaction.displayTransaction());
+        }
 }
