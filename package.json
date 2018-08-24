@@ -1,11 +1,24 @@
 {
   "name": "supportbank",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "support bank",
+  "main": "helloworld.js",
+  "dependencies": {
+    "moment": "^2.22.2",
+    "readline-sync": "^1.4.9"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dpsmith3/SupportBank.git"
+  },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dpsmith3/SupportBank/issues"
+  },
+  "homepage": "https://github.com/dpsmith3/SupportBank#readme"
 }
