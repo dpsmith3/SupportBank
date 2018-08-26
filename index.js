@@ -52,7 +52,21 @@ Amount: ${this.amount}`;
 function parseCsvTransactions(data) {
     const result = data.split('\r\n')
         .map(x => x.split(','))
-        .slice(1).map(x => new Transaction(moment(x[0], "DD-MM-YYYY"), x[1], x[2], x[3], +`${x[4]}`));
+        .slice(1).map(x => {
+            let transaction = new Transaction();
+            transaction.date = moment(x[0], "DD-MM-YYYY");
+            if (!moment(transaction.date).isValid()) {
+                logger.error(`'${x[0]}' could not be parsed as a date`);
+            }
+            transaction.from = x[1];
+            transaction.to = x[2];
+            transaction.narrative = x[3];
+            transaction.amount = +`${x[4]}`;
+            if (Number.isNaN(x[4])) {
+                logger.error(`${x[4]} is not a number`)
+            }
+            return transaction;
+        });
     return result;
 }
 
@@ -72,17 +86,12 @@ function loadTransactions(folderPath) {
     ;
 }
 
-// const rawTransactions2014 = fs.readFileSync("./Transactions2014.csv", "utf8");
-// const rawTransactions2015 = fs.readFileSync("./DodgyTransactions2015.csv", "utf8");
-// const transactions2014 = parseCsvTransactions(rawTransactions2014);
-// const transactions2015 = parseCsvTransactions(rawTransactions2015);
-
 function updatePersons(persons, transactions) {
     transactions.forEach(transaction => {
         // Handle new persons
-        if (!persons.map(elem => elem.name).includes(transaction.from)) {
+        if (!persons.map(person => person.name).includes(transaction.from)) {
             persons.push(new Person(transaction.from, - transaction.amount));
-        } else if (!persons.map(elem => elem.name).includes(transaction.to)) {
+        } else if (!persons.map(person => person.name).includes(transaction.to)) {
             persons.push(new Person(transaction.to, transaction.amount));
         } else {
             //Handle existing persons
