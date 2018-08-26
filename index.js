@@ -1,6 +1,19 @@
 const readlineSync = require('readline-sync');
 const moment = require('moment');
 const fs = require('fs');
+const log4js = require('log4js');
+const logger = log4js.getLogger('index');
+
+log4js.configure({
+    appenders: {
+        file: { type: 'fileSync', filename: 'logs/debug.log' }
+    },
+    categories: {
+        default: { appenders: ['file'], level: 'debug' }
+    }
+});
+
+logger.info('Starting Support Bank');
 
 class Person {
     constructor(name, account) {
@@ -37,11 +50,32 @@ Amount: ${this.amount}`;
 }
 
 function parseCsvTransactions(data) {
-    return data.split('\r\n')
+    const result = data.split('\r\n')
         .map(x => x.split(','))
-        .slice(1).map(x => new Transaction(moment(x[0], "DD-MM-YYYY"), x[1], x[2], x[3], +`${x[4]}`)
-        )
+        .slice(1).map(x => new Transaction(moment(x[0], "DD-MM-YYYY"), x[1], x[2], x[3], +`${x[4]}`));
+    return result;
 }
+
+function loadTransactions(folderPath) {
+    logger.info(`Loading transactions from ${folderPath}`);
+    var allTransactions = [];
+    const filenames = fs.readdirSync(folderPath);
+    filenames.forEach(filename => {
+        logger.info(`Loading ${folderPath}/${filename}`);
+        const rawTransactions = fs.readFileSync(`./transactions/${filename}`, "utf8");
+        const transactions = parseCsvTransactions(rawTransactions);
+        transactions.forEach(transaction => {
+            allTransactions.push(transaction);
+        })
+    })
+    return allTransactions;
+    ;
+}
+
+// const rawTransactions2014 = fs.readFileSync("./Transactions2014.csv", "utf8");
+// const rawTransactions2015 = fs.readFileSync("./DodgyTransactions2015.csv", "utf8");
+// const transactions2014 = parseCsvTransactions(rawTransactions2014);
+// const transactions2015 = parseCsvTransactions(rawTransactions2015);
 
 function updatePersons(persons, transactions) {
     transactions.forEach(transaction => {
@@ -87,9 +121,10 @@ function listAccount(command, persons, transactions) {
 }
 
 // Main
+
+const transactions = loadTransactions('./transactions');
+
 let persons = [];
-const rawTransactions2014 = fs.readFileSync("./transactions2014.csv", "utf8");
-const transactions = parseCsvTransactions(rawTransactions2014);
 persons = updatePersons(persons, transactions);
 
 console.log(`\n
