@@ -14,8 +14,6 @@ log4js.configure({
     }
 });
 
-logger.info('Starting Support Bank');
-
 class Person {
     constructor(name, account) {
         this.name = name;
@@ -30,7 +28,8 @@ Account: ${this.account.toFixed(2)}`;
     }
 }
 
-function updatePersons(persons, transactions) {
+function getPersons(transactions) {
+    const persons = [];
     transactions.forEach(transaction => {
         // Handle new persons
         if (!persons.map(person => person.name).includes(transaction.from)) {
@@ -73,33 +72,39 @@ function listAccount(command, persons, transactions) {
     requestedTransactions.forEach(transaction => transaction.displayTransaction());
 }
 
+function mainLoop(persons, transactions) {
+    while (true) {
+        console.log(`
+    Please enter one of the following commands:
+    
+        List All           [To see a list of all people and what they owe or are owed]
+        List [Account]     [To see a particular person's transactions and their amount owed or owing]
+    
+    or CTRL + C to close the program`);
+
+        const command = readlineSync.prompt();
+
+        if (command === 'List All') {
+            listAll(persons);
+        } else if (command.slice(0, 4) === 'List') {
+            listAccount(command, persons, transactions);
+        } else {
+            console.log("\nThat command was not recognised.");
+        }
+    }
+}
+
 // Main
-
-const transactions = loadCsvData.loadTransactions('./transactions');
-
-let persons = [];
-persons = updatePersons(persons, transactions);
-
+logger.info('Starting Support Bank');
 console.log(`\n
 Welcome to the Support Bank!
 ============================`);
 
-while (true) {
-    console.log(`
-Please enter one of the following commands:
-
-    List All           [To see a list of all people and what they owe or are owed]
-    List [Account]     [To see a particular person's transactions and their amount owed or owing]
-
-or CTRL + C to close the program`);
-
-    const command = readlineSync.prompt();
-
-    if (command === 'List All') {
-        listAll(persons);
-    } else if (command.slice(0,4) === 'List') {
-        listAccount(command, persons, transactions);
-    } else {
-        console.log("\nThat command was not recognised.");
-    }
+try {
+    const transactions = loadCsvData.loadTransactions('./transactions');
+    const persons = getPersons(transactions);
+    mainLoop(persons, transactions);
+} catch (err) {
+    logger.error(err);
+    console.log("Error loading transaction data. See log for more information.");
 }

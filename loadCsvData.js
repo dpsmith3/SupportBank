@@ -24,40 +24,48 @@ Amount: ${this.amount}`;
 }
 
 function parseCsvTransactions(data) {
-    const result = data.split('\r\n')
-        .map(x => x.split(','))
-        .slice(1).map((x, index) => {
-            let transaction = new Transaction();
-            transaction.date = moment(x[0], "DD-MM-YYYY");
-            if (!moment(transaction.date).isValid()) {
-                logger.error(`'${x[0]}' on line ${index + 2} of CSV file could not be parsed as a date`);
-            }
-            transaction.from = x[1];
-            transaction.to = x[2];
-            transaction.narrative = x[3];
-            transaction.amount = +`${x[4]}`;
-            if (Number.isNaN(+x[4])) {
-                logger.error(`'${x[4]}' on line ${index + 2} of CSV file is not a number`);
-            }
-            return transaction;
-        });
-    return result;
+    try {
+        const result = data.split('\r\n')
+            .map(x => x.split(','))
+            .slice(1)
+            .map((x, index) => {
+                if (!moment(x[0], "DD-MM-YYYY").isValid()) {
+                    throw new Error(`'${x[0]}' on line ${index + 2} of CSV file could not be parsed as a date`);
+                } else if (!typeof x[1] === 'string') {
+                    throw new Error(`${x[1]} on line ${index + 2} of CSV file is not a string`);
+                } else if (!typeof x[2] === 'string') {
+                    throw new Error(`${x[2]} on line ${index + 2} of CSV file is not a string`);
+                } else if (Number.isNaN(+x[4])) {
+                    throw new Error(`'${x[4]}' on line ${index + 2} of CSV file is not a number`);
+                } else {
+                    return new Transaction(moment(x[0], "DD-MM-YYYY"), x[1], x[2], x[3], +`${x[4]}`);
+                }
+            });
+        return result;
+    } catch (err) {
+        logger.error(err);
+    }
 }
 
 function loadTransactions(folderPath) {
     logger.info(`Loading transactions from ${folderPath}`);
-    var allTransactions = [];
-    const filenames = fs.readdirSync(folderPath);
-    filenames.forEach(filename => {
-        logger.info(`Loading ${folderPath}/${filename}`);
-        const rawTransactions = fs.readFileSync(`./transactions/${filename}`, "utf8");
-        const transactions = parseCsvTransactions(rawTransactions);
-        transactions.forEach(transaction => {
-            allTransactions.push(transaction);
+    try {
+        var allTransactions = [];
+        const filenames = fs.readdirSync(folderPath);
+        filenames.forEach(filename => {
+            logger.info(`Loading ${folderPath}/${filename}`);
+            const rawTransactions = fs.readFileSync(`./transactions/${filename}`, "utf8");
+            const transactions = parseCsvTransactions(rawTransactions);
+            transactions.forEach(transaction => {
+                allTransactions.push(transaction);
+            })
         })
-    })
-    return allTransactions;
-    ;
+        logger.info('All transactions loaded successfully');
+        return allTransactions;
+    } catch (err) {
+        logger.error("Error caught in loadTransactions function: ", err);
+    }
+
 }
 
 exports.loadTransactions = loadTransactions;
