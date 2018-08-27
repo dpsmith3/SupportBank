@@ -23,49 +23,56 @@ Amount: ${this.amount}`;
     }
 }
 
-function parseCsvTransactions(data) {
-    try {
-        const result = data.split('\r\n')
-            .map(x => x.split(','))
-            .slice(1)
-            .map((x, index) => {
-                if (!moment(x[0], "DD-MM-YYYY").isValid()) {
-                    throw new Error(`'${x[0]}' on line ${index + 2} of CSV file could not be parsed as a date`);
-                } else if (!typeof x[1] === 'string') {
-                    throw new Error(`${x[1]} on line ${index + 2} of CSV file is not a string`);
-                } else if (!typeof x[2] === 'string') {
-                    throw new Error(`${x[2]} on line ${index + 2} of CSV file is not a string`);
-                } else if (Number.isNaN(+x[4])) {
-                    throw new Error(`'${x[4]}' on line ${index + 2} of CSV file is not a number`);
-                } else {
-                    return new Transaction(moment(x[0], "DD-MM-YYYY"), x[1], x[2], x[3], +`${x[4]}`);
-                }
-            });
-        return result;
-    } catch (err) {
-        logger.error(err);
+function parseCsvTransactionLine(line, lineNumber, filename) {
+    { // Checks that data is valid and replaces each row (currently an array of cells) with a Transaction object which stores the data for that row.
+        if (!moment(line[0], "DD-MM-YYYY").isValid()) {
+            throw new Error(`'${line[0]}' on line ${lineNumber} of ${filename} could not be parsed as a date.`);
+            return null;
+        } else if (!typeof line[1] === 'string') {
+            throw new Error(`${line[1]} on line ${lineNumber} of ${filename} is not a string.`);
+            return null;
+        } else if (!typeof line[2] === 'string') {
+            throw new Error(`${line[2]} on line ${lineNumber} of ${filename} is not a string.`);
+            return null;
+        } else if (Number.isNaN(+line[4])) {
+            throw new Error(`'${line[4]}' on line ${lineNumber} of ${filename} is not a number.`);
+            return null;
+        } else {
+            return new Transaction(moment(line[0], "DD-MM-YYYY"), line[1], line[2], line[3], +`${line[4]}`);
+        }
     }
+}
+
+function parseCsvTransactions(data, filename) {
+    const result = data.split('\r\n')
+        .map(line => line.split(','))
+        .slice(1)
+        .map((line, index) => {
+            try {
+                return parseCsvTransactionLine(line, index + 2, filename);
+            } catch (err) {
+                logger.error(err);
+                console.log(`Error: ${err.message} This transaction has not been loaded.`);
+                return null;
+            }
+        });
+    return result.filter(Boolean);
 }
 
 function loadTransactions(folderPath) {
     logger.info(`Loading transactions from ${folderPath}`);
-    try {
-        var allTransactions = [];
-        const filenames = fs.readdirSync(folderPath);
-        filenames.forEach(filename => {
-            logger.info(`Loading ${folderPath}/${filename}`);
-            const rawTransactions = fs.readFileSync(`./transactions/${filename}`, "utf8");
-            const transactions = parseCsvTransactions(rawTransactions);
-            transactions.forEach(transaction => {
-                allTransactions.push(transaction);
-            })
+    var allTransactions = [];
+    const filenames = fs.readdirSync(folderPath);
+    filenames.forEach(filename => {
+        logger.info(`Loading ${folderPath}/${filename}`);
+        const rawTransactions = fs.readFileSync(`./transactions/${filename}`, "utf8");
+        const transactions = parseCsvTransactions(rawTransactions, filename);
+        transactions.forEach(transaction => {
+            allTransactions.push(transaction);
         })
-        logger.info('All transactions loaded successfully');
-        return allTransactions;
-    } catch (err) {
-        logger.error("Error caught in loadTransactions function: ", err);
-    }
-
+    })
+    logger.info('Finished loading transactions.');
+    return allTransactions;
 }
 
 exports.loadTransactions = loadTransactions;

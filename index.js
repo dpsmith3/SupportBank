@@ -75,12 +75,12 @@ function listAccount(command, persons, transactions) {
 function mainLoop(persons, transactions) {
     while (true) {
         console.log(`
-    Please enter one of the following commands:
-    
-        List All           [To see a list of all people and what they owe or are owed]
-        List [Account]     [To see a particular person's transactions and their amount owed or owing]
-    
-    or CTRL + C to close the program`);
+Please enter one of the following commands:
+
+    List All           [To see a list of all people and what they owe or are owed]
+    List [Account]     [To see a particular person's transactions and their amount owed or owing]
+
+or CTRL + C to close the program`);
 
         const command = readlineSync.prompt();
 
@@ -100,11 +100,6 @@ console.log(`\n
 Welcome to the Support Bank!
 ============================`);
 
-try {
-    const transactions = loadCsvData.loadTransactions('./transactions');
-    const persons = getPersons(transactions);
-    mainLoop(persons, transactions);
-} catch (err) {
-    logger.error(err);
-    console.log("Error loading transaction data. See log for more information.");
-}
+const transactions = loadCsvData.loadTransactions('./transactions');
+const persons = getPersons(transactions);
+mainLoop(persons, transactions);
