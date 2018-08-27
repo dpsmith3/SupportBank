@@ -61,4 +61,4 @@ typings/
 .next
 
 # Sample CSV transaction files to test
-test-transactions/*
+test-transactions/
