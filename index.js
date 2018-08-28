@@ -1,9 +1,7 @@
 const readlineSync = require('readline-sync');
-const moment = require('moment');
-const fs = require('fs');
 const log4js = require('log4js');
 const logger = log4js.getLogger('index');
-const loadCsvData = require('./loadCsvData.js');
+const transactionHandler = require('./transactionHandler');
 
 log4js.configure({
     appenders: {
@@ -100,6 +98,6 @@ console.log(`\n
 Welcome to the Support Bank!
 ============================`);
 
-const transactions = loadCsvData.loadTransactions('./transactions');
+const transactions = transactionHandler.loadTransactions('./transactions');
 const persons = getPersons(transactions);
 mainLoop(persons, transactions);
