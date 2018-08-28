@@ -27,9 +27,9 @@ Amount: ${this.amount}`;
 
 function readFileTypeAndParse(rawTransactions, filename) {
     if (filename.slice(-4) === '.csv') {
-        return csvParser.parseCsv(rawTransactions, filename);
+        return csvParser.parseCsvFile(rawTransactions, filename);
     } else if (filename.slice(-5) === '.json') {
-        return jsonParser.parseJson(rawTransactions, filename);
+        return jsonParser.parseJsonFile(rawTransactions, filename);
     } else {
         const e = new Error(`${filename} - file type not recognised.`);
         logger.error(e);
