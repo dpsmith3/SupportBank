@@ -38,6 +38,7 @@ function getPersons(transactions) {
 }
 
 function listAll(persons) {
+    logger.info('Listing all accounts')
     persons.forEach(element => element.displayPerson());
 }
 

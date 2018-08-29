@@ -1,9 +1,10 @@
 const moment = require('moment');
 const fs = require('fs');
 const log4js = require('log4js');
-const logger = log4js.getLogger('transactionshandler');
+const logger = log4js.getLogger('transactionHandler');
 const csvParser = require('./csvParser.js');
 const jsonParser = require('./jsonParser.js');
+const xmlParser = require('./xmlParser.js');
 
 class Transaction {
     constructor(date, from, to, narrative, amount) {
@@ -30,6 +31,8 @@ function readFileTypeAndParse(rawTransactions, filename) {
         return csvParser.parseCsvFile(rawTransactions, filename);
     } else if (filename.slice(-5) === '.json') {
         return jsonParser.parseJsonFile(rawTransactions, filename);
+    } else if (filename.slice(-4) === '.xml') {
+        return xmlParser.parseXmlFile(rawTransactions, filename);
     } else {
         const e = new Error(`${filename} - file type not recognised.`);
         logger.error(e);
