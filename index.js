@@ -13,6 +13,29 @@ log4js.configure({
     }
 });
 
+function importTransactions() {
+    while (true) {
+        console.log(`To import transaction data, please choose one of the following commands:
+
+        Import File [path]       [To load a file of transaction files]
+        Import Folder [path]     [To load a folder of transaction files]
+        Default                  [To import all files from the default folder (./transactions)]`);
+
+        const command = readlineSync.prompt().trim().toLowerCase();
+        if (command.slice(0, 11) === 'import file') {
+            const filePath = command.slice(12);
+            return transactionHandler.loadFile(filePath);
+        } else if (command.slice(0, 13) === 'import folder') {
+            const folderPath = command.slice(14);
+            return transactionHandler.loadFolder(folderPath);
+        } else if (command === 'default') {
+            return transactionHandler.loadFolder('./transactions');
+        } else {
+            console.log("\nThat command was not recognised.");
+        }
+    }
+}
+
 function mainLoop(persons, transactions) {
     while (true) {
         console.log(`
@@ -41,6 +64,6 @@ console.log(`\n
 Welcome to the Support Bank!
 ============================`);
 
-const transactions = transactionHandler.loadFolder('./transactions');
+const transactions = importTransactions();
 const persons = accounts.getPersons(transactions);
 mainLoop(persons, transactions);

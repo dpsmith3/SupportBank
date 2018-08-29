@@ -56,5 +56,6 @@ function loadFolder(folderPath) {
     return allTransactions;
 }
 
+exports.loadFile = loadFile;
 exports.loadFolder = loadFolder;
 exports.Transaction = Transaction;
