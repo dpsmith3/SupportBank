@@ -41,6 +41,6 @@ console.log(`\n
 Welcome to the Support Bank!
 ============================`);
 
-const transactions = transactionHandler.loadTransactions('./transactions');
+const transactions = transactionHandler.loadFolder('./transactions');
 const persons = accounts.getPersons(transactions);
 mainLoop(persons, transactions);

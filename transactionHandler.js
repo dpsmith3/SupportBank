@@ -38,19 +38,23 @@ function readFileTypeAndParse(rawTransactions, filename) {
     }
 }
 
-function loadTransactions(folderPath) {
+function loadFile(filename, folderPath = './transactions') {
+    logger.info(`Loading ${folderPath}/${filename}`);
+    const rawTransactions = fs.readFileSync(`${folderPath}/${filename}`, "utf8");
+    return readFileTypeAndParse(rawTransactions, filename); 
+}
+
+function loadFolder(folderPath) {
     logger.info(`Loading transactions from ${folderPath}`);
     var allTransactions = [];
     const filenames = fs.readdirSync(folderPath);
-    filenames.forEach(filename => {
-        logger.info(`Loading ${folderPath}/${filename}`);
-        const rawTransactions = fs.readFileSync(`./transactions/${filename}`, "utf8");
-        const transactions = readFileTypeAndParse(rawTransactions, filename); 
-        transactions.forEach(transaction => allTransactions.push(transaction));
-    })
+    filenames.forEach((filename, folderPath) => {
+        const fileTransactions = loadFile(filename);
+        fileTransactions.forEach(transaction => allTransactions.push(transaction));
+    });
     logger.info('Finished loading transactions.');
     return allTransactions;
 }
 
-exports.loadTransactions = loadTransactions;
+exports.loadFolder = loadFolder;
 exports.Transaction = Transaction;
