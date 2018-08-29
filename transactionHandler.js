@@ -1,7 +1,7 @@
 const moment = require('moment');
 const fs = require('fs');
 const log4js = require('log4js');
-const logger = log4js.getLogger('transactionsLoader');
+const logger = log4js.getLogger('transactionshandler');
 const csvParser = require('./csvParser.js');
 const jsonParser = require('./jsonParser.js');
 
