@@ -18,7 +18,7 @@ function parseCsvTransaction(transaction, lineNumber, filename) {
             transaction[3],
             Number(transaction[4])
         );
-    return transactionHandler.validateTransaction(parsedTransaction, lineNumber, filename);
+    return transactionHandler.validateTransaction(parsedTransaction, lineNumber + 1, filename);
 }
 
 exports.parseCsvTransaction = parseCsvTransaction;

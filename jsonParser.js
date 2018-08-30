@@ -8,7 +8,7 @@ function getRawTransactionsFromJson(rawData) {
     return rawTransactions;
 }
 
-function parseJsonTransaction(transaction, lineNumber, filename) { 
+function parseJsonTransaction(transaction, transactionIndex, filename) { 
     const parsedTransaction = new transactionHandler.Transaction(
             moment(transaction.Date, "DD-MM-YYYY"),
             transaction.FromAccount,
@@ -16,7 +16,7 @@ function parseJsonTransaction(transaction, lineNumber, filename) {
             transaction.Narrative,
             Number(transaction.Amount)
         );
-        return transactionHandler.validateTransaction(parsedTransaction);
+        return transactionHandler.validateTransaction(parsedTransaction, transactionIndex - 1, filename);
 }
 
 exports.parseJsonTransaction = parseJsonTransaction;

@@ -41,20 +41,25 @@ function getFileType(filename) {
     }
 }
 
-function validateTransaction(parsedTransaction, lineNumber, filename) {
+function validateTransaction(parsedTransaction, transactionNumber, filename) {
+    let err;
     if (!parsedTransaction.date.isValid()) {
-        throw new Error(`'${parsedTransaction.date}' on line ${lineNumber} in ${filename} could not be parsed as a date.`);
+        err = 'Invalid date';
     } else if (!typeof parsedTransaction.from === 'string') {
-        throw new Error(`${parsedTransaction.from} on line ${lineNumber} in ${filename} is not a string.`);
+        err = 'Invalid "to" name';
     } else if (!typeof parsedTransaction.to === 'string') {
-        throw new Error(`${parsedTransaction.to} on line ${lineNumber} in ${filename} is not a string.`);
+        err = 'Invalid "from" name';
     } else if (!typeof parsedTransaction.narrative === 'string') {
-        throw new Error(`${parsedTransaction.narrative} on line ${lineNumber} in ${filename} is not a string.`);
+        err = 'Invalid description';
     } else if (Number.isNaN(parsedTransaction.amount)) {
-        throw new Error(`${parsedTransaction.amount} on line ${lineNumber} in ${filename} is not a number.`);
+        err = 'Invalid amount';
+    }
+
+    if (err) {
+        throw new Error(`${err} in transaction ${transactionNumber} in ${filename}.`);
     } else {
-        return parsedTransaction;
-    }    
+        return parsedTransaction;    
+    }
 }
 
 function getTransactions(rawData, filename, parseFile, parseTransaction) {

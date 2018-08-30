@@ -26,7 +26,7 @@ function parseXmlTransaction(transaction, lineNumber, filename) {
         transaction.Description[0],
         Number(transaction.Value[0])
     );
-    return transactionHandler.validateTransaction(parsedTransaction, lineNumber, filename);
+    return transactionHandler.validateTransaction(parsedTransaction, lineNumber - 1, filename);
 }
 
 exports.parseXmlTransaction = parseXmlTransaction;
