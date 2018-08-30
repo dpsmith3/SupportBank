@@ -24,7 +24,7 @@ function importTransactions() {
         const command = readlineSync.prompt().trim().toLowerCase();
         if (command.slice(0, 11) === 'import file') {
             const filePath = command.slice(12);
-            return transactionHandler.loadFile(filePath, './');
+            return transactionHandler.importFile(filePath, './');
         } else if (command.slice(0, 13) === 'import folder') {
             const folderPath = command.slice(14);
             return transactionHandler.loadFolder(folderPath);

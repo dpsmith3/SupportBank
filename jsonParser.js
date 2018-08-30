@@ -3,18 +3,9 @@ const log4js = require('log4js');
 const logger = log4js.getLogger('jsonParser');
 const transactionHandler = require('./transactionHandler');
 
-function parseJsonFile(rawData, filename) {
+function getRawTransactionsFromJson(rawData) {
     const rawTransactions = JSON.parse(rawData);
-    allTransactions = rawTransactions.map((line, index) => { 
-        try {
-            return parseJsonTransaction(line, index, filename);
-        } catch (err) {
-            logger.error(err);
-            console.log(`Error: ${err.message} This transaction has not been loaded.`);
-            return null;
-        }
-    });
-    return allTransactions.filter(Boolean);
+    return rawTransactions;
 }
 
 function parseJsonTransaction(transaction, lineNumber, filename) { 
@@ -28,4 +19,5 @@ function parseJsonTransaction(transaction, lineNumber, filename) {
         return transactionHandler.validateTransaction(parsedTransaction);
 }
 
-exports.parseJsonFile = parseJsonFile;
+exports.parseJsonTransaction = parseJsonTransaction;
+exports.getRawTransactionsFromJson = getRawTransactionsFromJson;

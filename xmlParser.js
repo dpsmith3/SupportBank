@@ -4,29 +4,18 @@ const logger = log4js.getLogger('xmlParser');
 const transactionHandler = require('./transactionHandler');
 const fs = require('fs');
 const xml2js = require('xml2js');
-
 const parser = new xml2js.Parser();
 
-
-function parseXmlFile(data, filename) {
+function getRawTransactionsFromXml(rawData) {
     let parsedData;
-    parser.parseString(data, function (err, result) {
+    parser.parseString(rawData, function (err, result) {
         parsedData = result;
         if (err) {
             logger.error(err);
         }
     });
-    const transactions = parsedData.TransactionList.SupportTransaction;
-    const transactionsAsObjects = transactions.map((line, index) => {
-        try {
-            return parseXmlTransaction(line, index + 2, filename);
-        } catch (err) {
-            logger.error(err);
-            console.log(`Error: ${err.message} This transaction has not been loaded.`);
-            return null;
-        }
-    });
-    return transactionsAsObjects.filter(Boolean);
+    const rawTransactions = parsedData.TransactionList.SupportTransaction;
+    return rawTransactions;
 }
 
 function parseXmlTransaction(transaction, lineNumber, filename) {
@@ -40,4 +29,5 @@ function parseXmlTransaction(transaction, lineNumber, filename) {
     return transactionHandler.validateTransaction(parsedTransaction, lineNumber, filename);
 }
 
-exports.parseXmlFile = parseXmlFile;
+exports.parseXmlTransaction = parseXmlTransaction;
+exports.getRawTransactionsFromXml = getRawTransactionsFromXml;

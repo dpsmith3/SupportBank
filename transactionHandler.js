@@ -26,13 +26,13 @@ Amount: ${this.amount}`;
     }
 }
 
-function readFileTypeAndParse(rawTransactions, filename) {
+function getFileType(filename) {
     if (filename.slice(-4) === '.csv') {
-        return csvParser.parseCsvFile(rawTransactions, filename);
+        return 'csv';
     } else if (filename.slice(-5) === '.json') {
-        return jsonParser.parseJsonFile(rawTransactions, filename);
+        return 'json';
     } else if (filename.slice(-4) === '.xml') {
-        return xmlParser.parseXmlFile(rawTransactions, filename);
+        return 'xml';
     } else {
         const e = new Error(`${filename} - file type not recognised.`);
         logger.error(e);
@@ -40,7 +40,6 @@ function readFileTypeAndParse(rawTransactions, filename) {
         throw e;
     }
 }
-
 
 function validateTransaction(parsedTransaction, lineNumber, filename) {
     if (!parsedTransaction.date.isValid()) {
@@ -58,12 +57,37 @@ function validateTransaction(parsedTransaction, lineNumber, filename) {
     }    
 }
 
+function getTransactions(rawData, filename, parseFile, parseTransaction) {
+    const rawTransactions = parseFile(rawData);
+    const transactions = rawTransactions.map((transaction, index) => {
+        try {
+            return parseTransaction(transaction, index, filename);
+        } catch (err) {
+            logger.error(err);
+            console.log(`${err.message} This transaction has not been loaded.`);
+            return null;
+        }
+    });
+    return transactions.filter(Boolean);
+}
 
-//TO DO: error handling for incorrect file path
-function loadFile(filename, folderPath = './transactions') {
+function importFile(filename, folderPath = './transactions') {
     logger.info(`Loading ${folderPath}/${filename}`);
-    const rawTransactions = fs.readFileSync(`${folderPath}/${filename}`, "utf8");
-    return readFileTypeAndParse(rawTransactions, filename); 
+    const rawData = fs.readFileSync(`${folderPath}/${filename}`, "utf8");
+    const filetype = getFileType(filename);
+    let parseFile, parseTransaction;
+    if (filetype === 'csv') {
+        parseFile = csvParser.getRawTransactionsFromCsv;
+        parseTransaction = csvParser.parseCsvTransaction;
+    } else if (filetype === 'json') {
+        parseFile = jsonParser.getRawTransactionsFromJson;
+        parseTransaction = jsonParser.parseJsonTransaction;
+    } else if (filetype === 'xml') {
+        parseFile = xmlParser.getRawTransactionsFromXml;
+        parseTransaction = xmlParser.parseXmlTransaction;
+    }
+    const transactions = getTransactions(rawData, filename, parseFile, parseTransaction)
+    return transactions;
 }
 
 //TO DO: error handling for incorrect folder path
@@ -72,14 +96,14 @@ function loadFolder(folderPath) {
     var allTransactions = [];
     const filenames = fs.readdirSync(folderPath);
     filenames.forEach((filename) => {
-        const fileTransactions = loadFile(filename, folderPath);
+        const fileTransactions = importFile(filename, folderPath);
         fileTransactions.forEach(transaction => allTransactions.push(transaction));
     });
     logger.info('Finished loading transactions.');
     return allTransactions;
 }
 
-exports.loadFile = loadFile;
+exports.importFile = importFile;
 exports.loadFolder = loadFolder;
 exports.Transaction = Transaction;
 exports.validateTransaction = validateTransaction;
