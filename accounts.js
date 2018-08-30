@@ -44,7 +44,14 @@ function listAll(persons) {
 
 function listAccount(command, persons, transactions) {
     const requestedName = command.slice(5);
-    const requestedAccount = persons.find(person => person.name === requestedName).account.toFixed(2);
+    logger.info(`Listing ${requestedName}'s account.`);
+    let requestedAccount;
+    try {
+        requestedAccount = persons.find(person => person.name === requestedName).account.toFixed(2);
+    } catch (err) {
+        logger.error(err);
+        throw new Error('Requested account not found');
+    }
     const requestedTransactions = transactions.filter(transaction => {
         if (transaction.from === requestedName || transaction.to === requestedName) {
             return true;

@@ -14,26 +14,38 @@ log4js.configure({
 });
 
 function importTransactions() {
-    while (true) {
+    let result = {
+        finished: false,
+        transactions: []
+    }
+    do {
         console.log(`To import transaction data, please choose one of the following commands:
 
-        Import File [path]       [To load a file of transaction files]
-        Import Folder [path]     [To load a folder of transaction files]
-        Default                  [To import all files from the default folder (./transactions)]`);
+    Import File [path]       [To load a file of transaction files]
+    Import Folder [path]     [To load a folder of transaction files]
+    Default                  [To import all files from the default folder (./transactions)]`);
 
         const command = readlineSync.prompt().trim().toLowerCase();
-        if (command.slice(0, 11) === 'import file') {
-            const filePath = command.slice(12);
-            return transactionHandler.importFile(filePath, './');
-        } else if (command.slice(0, 13) === 'import folder') {
-            const folderPath = command.slice(14);
-            return transactionHandler.loadFolder(folderPath);
-        } else if (command === 'default') {
-            return transactionHandler.loadFolder('./transactions');
-        } else {
-            console.log("\nThat command was not recognised.");
+        try {
+            if (command.slice(0, 11) === 'import file') {
+                const filePath = command.slice(12);
+                result.transactions = transactionHandler.importFile(filePath, './');
+            } else if (command.slice(0, 13) === 'import folder') {
+                const folderPath = command.slice(14);
+                result.transactions = transactionHandler.loadFolder(folderPath);
+            } else if (command === 'default') {
+                result.transactions = transactionHandler.loadFolder('./transactions');
+            } else {
+                throw new Error('Import command not recognised.');
+            }
+            result.finished = true;
+            console.log("Finished loading transactions: "); 
+            return result.transactions;
+        } catch (err) {
+            logger.error(err);
+            console.log(err.message);
         }
-    }
+    } while (result.finished === false);
 }
 
 function mainLoop(persons, transactions) {
@@ -46,12 +58,17 @@ Please enter one of the following commands:
 
 or CTRL + C to close the program`);
 
-        const command = readlineSync.prompt();
+        const command = readlineSync.prompt().trim();
 
         if (command === 'List All') {
             accounts.listAll(persons);
         } else if (command.slice(0, 4) === 'List') {
-            accounts.listAccount(command, persons, transactions);
+            try {
+                accounts.listAccount(command, persons, transactions);
+            } catch (err) {
+                logger.error(err);
+                console.log(err.message);
+            }
         } else {
             console.log("\nThat command was not recognised.");
         }

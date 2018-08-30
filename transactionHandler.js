@@ -72,7 +72,7 @@ function getTransactions(rawData, filename, parseFile, parseTransaction) {
 }
 
 function importFile(filename, folderPath = './transactions') {
-    logger.info(`Loading ${folderPath}/${filename}`);
+    logger.info(`Loading file ${folderPath}/${filename}`);
     const rawData = fs.readFileSync(`${folderPath}/${filename}`, "utf8");
     const filetype = getFileType(filename);
     let parseFile, parseTransaction;
@@ -90,17 +90,21 @@ function importFile(filename, folderPath = './transactions') {
     return transactions;
 }
 
-//TO DO: error handling for incorrect folder path
 function loadFolder(folderPath) {
     logger.info(`Loading transactions from ${folderPath}`);
     var allTransactions = [];
-    const filenames = fs.readdirSync(folderPath);
-    filenames.forEach((filename) => {
-        const fileTransactions = importFile(filename, folderPath);
-        fileTransactions.forEach(transaction => allTransactions.push(transaction));
-    });
-    logger.info('Finished loading transactions.');
-    return allTransactions;
+    try {
+        const filenames = fs.readdirSync(folderPath);
+        filenames.forEach((filename) => {
+            const fileTransactions = importFile(filename, folderPath);
+            fileTransactions.forEach(transaction => allTransactions.push(transaction));
+            logger.info(`Finished loading transactions from ${filename}`);
+        });
+        return allTransactions;
+    } catch (err) {
+        logger.error(err);
+            console.log(`Transactions could not be loaded. See log for more details.`);
+    }
 }
 
 exports.importFile = importFile;
