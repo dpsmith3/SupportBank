@@ -26,22 +26,18 @@ function parseXmlFile(data, filename) {
             return null;
         }
     });
-    logger.info('xml file loaded');
-    return transactionsAsObjects;
+    return transactionsAsObjects.filter(Boolean);
 }
 
-function parseXmlTransaction(transaction, transactionNumber, filename) {
-    return new transactionHandler.Transaction(
+function parseXmlTransaction(transaction, lineNumber, filename) {
+    const parsedTransaction = new transactionHandler.Transaction(
         moment("1900", "YYYY").add(transaction.$.Date, 'days'),
         transaction.Parties[0].From[0],
         transaction.Parties[0].To[0],
         transaction.Description[0],
         Number(transaction.Value[0])
     );
+    return transactionHandler.validateTransaction(parsedTransaction, lineNumber, filename);
 }
-
-// const testFile = fs.readFileSync('./transactions/Transactions2012.xml');
-// const parsedTestFile = parseXmlFile(testFile);
-// console.log(parsedTestFile);
 
 exports.parseXmlFile = parseXmlFile;

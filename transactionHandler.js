@@ -41,18 +41,38 @@ function readFileTypeAndParse(rawTransactions, filename) {
     }
 }
 
+
+function validateTransaction(parsedTransaction, lineNumber, filename) {
+    if (!parsedTransaction.date.isValid()) {
+        throw new Error(`'${parsedTransaction.date}' on line ${lineNumber} in ${filename} could not be parsed as a date.`);
+    } else if (!typeof parsedTransaction.from === 'string') {
+        throw new Error(`${parsedTransaction.from} on line ${lineNumber} in ${filename} is not a string.`);
+    } else if (!typeof parsedTransaction.to === 'string') {
+        throw new Error(`${parsedTransaction.to} on line ${lineNumber} in ${filename} is not a string.`);
+    } else if (!typeof parsedTransaction.narrative === 'string') {
+        throw new Error(`${parsedTransaction.narrative} on line ${lineNumber} in ${filename} is not a string.`);
+    } else if (Number.isNaN(parsedTransaction.amount)) {
+        throw new Error(`${parsedTransaction.amount} on line ${lineNumber} in ${filename} is not a number.`);
+    } else {
+        return parsedTransaction;
+    }    
+}
+
+
+//TO DO: error handling for incorrect file path
 function loadFile(filename, folderPath = './transactions') {
     logger.info(`Loading ${folderPath}/${filename}`);
     const rawTransactions = fs.readFileSync(`${folderPath}/${filename}`, "utf8");
     return readFileTypeAndParse(rawTransactions, filename); 
 }
 
+//TO DO: error handling for incorrect folder path
 function loadFolder(folderPath) {
     logger.info(`Loading transactions from ${folderPath}`);
     var allTransactions = [];
     const filenames = fs.readdirSync(folderPath);
-    filenames.forEach((filename, folderPath) => {
-        const fileTransactions = loadFile(filename);
+    filenames.forEach((filename) => {
+        const fileTransactions = loadFile(filename, folderPath);
         fileTransactions.forEach(transaction => allTransactions.push(transaction));
     });
     logger.info('Finished loading transactions.');
@@ -62,3 +82,4 @@ function loadFolder(folderPath) {
 exports.loadFile = loadFile;
 exports.loadFolder = loadFolder;
 exports.Transaction = Transaction;
+exports.validateTransaction = validateTransaction;

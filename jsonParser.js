@@ -17,26 +17,15 @@ function parseJsonFile(rawData, filename) {
     return allTransactions.filter(Boolean);
 }
 
-function parseJsonTransaction(transaction, lineNumber, filename) { // If transaction is valid, return transaction object. If transaction not valid, throw error.
-    if (!moment(transaction.Date, "YYYY-MM-DD").isValid()) {
-        throw new Error(`'${transaction.Date}' on line ${lineNumber} in ${filename} could not be parsed as a date.`);
-    } else if (!typeof transaction.FromAccount === 'string') {
-        throw new Error(`${transaction.FromAccount} on line ${lineNumber} in ${filename} is not a string.`);
-    } else if (!typeof transaction.ToAccount === 'string') {
-        throw new Error(`${transaction.ToAccount} on line ${lineNumber} in ${filename} is not a string.`);
-    } else if (!typeof transaction.Narrative === 'string') {
-        throw new Error(`${transaction.Narrative} on line ${lineNumber} in ${filename} is not a string.`);
-    } else if (Number.isNaN(+transaction.Amount)) {
-        throw new Error(`${transaction.Amount} on line ${lineNumber} in ${filename} is not a number.`);
-    } else {
-        return new transactionHandler.Transaction(
+function parseJsonTransaction(transaction, lineNumber, filename) { 
+    const parsedTransaction = new transactionHandler.Transaction(
             moment(transaction.Date, "DD-MM-YYYY"),
             transaction.FromAccount,
             transaction.ToAccount,
             transaction.Narrative,
             Number(transaction.Amount)
         );
-    }
+        return transactionHandler.validateTransaction(parsedTransaction);
 }
 
 exports.parseJsonFile = parseJsonFile;
