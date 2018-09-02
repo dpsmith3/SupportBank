@@ -6,6 +6,7 @@
   "dependencies": {
     "log4js": "^3.0.5",
     "moment": "^2.22.2",
+    "moment-msdate": "^2.0.1",
     "readline-sync": "^1.4.9",
     "xml2js": "^0.4.19"
   },

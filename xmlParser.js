@@ -1,4 +1,5 @@
 const moment = require('moment');
+const momentMsdate = require("moment-msdate");
 const log4js = require('log4js');
 const logger = log4js.getLogger('xmlParser');
 const transactionHandler = require('./transactionHandler');
@@ -20,7 +21,7 @@ function getRawTransactionsFromXml(rawData) {
 
 function parseXmlTransaction(transaction, lineNumber, filename) {
     const parsedTransaction = new transactionHandler.Transaction(
-        moment("1900", "YYYY").add(transaction.$.Date, 'days'),
+        moment.fromOADate(transaction.$.Date),
         transaction.Parties[0].From[0],
         transaction.Parties[0].To[0],
         transaction.Description[0],

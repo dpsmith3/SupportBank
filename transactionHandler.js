@@ -5,6 +5,7 @@ const logger = log4js.getLogger('transactionHandler');
 const csvParser = require('./csvParser.js');
 const jsonParser = require('./jsonParser.js');
 const xmlParser = require('./xmlParser.js');
+const path = require('path');
 
 class Transaction {
     constructor(date, from, to, narrative, amount) {
@@ -23,21 +24,6 @@ To: ${this.to}
 Narrative: ${this.narrative}
 Amount: ${this.amount}`;
         console.log(result);
-    }
-}
-
-function getFileType(filename) {
-    if (filename.slice(-4) === '.csv') {
-        return 'csv';
-    } else if (filename.slice(-5) === '.json') {
-        return 'json';
-    } else if (filename.slice(-4) === '.xml') {
-        return 'xml';
-    } else {
-        const e = new Error(`${filename} - file type not recognised.`);
-        logger.error(e);
-        console.log(e);
-        throw e;
     }
 }
 
@@ -79,15 +65,15 @@ function getTransactions(rawData, filename, parseFile, parseTransaction) {
 function importFile(filename, folderPath = './transactions') {
     logger.info(`Loading file ${folderPath}/${filename}`);
     const rawData = fs.readFileSync(`${folderPath}/${filename}`, "utf8");
-    const filetype = getFileType(filename);
+    const filetype = path.extname(filename);
     let parseFile, parseTransaction;
-    if (filetype === 'csv') {
+    if (filetype === '.csv') {
         parseFile = csvParser.getRawTransactionsFromCsv;
         parseTransaction = csvParser.parseCsvTransaction;
-    } else if (filetype === 'json') {
+    } else if (filetype === '.json') {
         parseFile = jsonParser.getRawTransactionsFromJson;
         parseTransaction = jsonParser.parseJsonTransaction;
-    } else if (filetype === 'xml') {
+    } else if (filetype === '.xml') {
         parseFile = xmlParser.getRawTransactionsFromXml;
         parseTransaction = xmlParser.parseXmlTransaction;
     }
