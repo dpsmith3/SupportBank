@@ -52,11 +52,9 @@ function listAccount(command, persons, transactions) {
         logger.error(err);
         throw new Error('Requested account not found');
     }
-    const requestedTransactions = transactions.filter(transaction => {
-        if (transaction.from === requestedName || transaction.to === requestedName) {
-            return true;
-        }
-    });
+    const requestedTransactions = transactions.filter(transaction => (
+        transaction.from === requestedName || transaction.to === requestedName
+    ));
 
     if (requestedAccount > 0) {
         console.log(`\n${requestedName} is owed ${requestedAccount}`);
