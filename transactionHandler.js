@@ -27,7 +27,6 @@ Amount: ${this.amount}`;
     }
 }
 
-// TO DO:
 function importFile(filename, folderPath = './transactions') {
     logger.info(`Loading file ${folderPath}/${filename}`);
     const rawData = fs.readFileSync(`${folderPath}/${filename}`, "utf8");
@@ -39,7 +38,6 @@ function importFile(filename, folderPath = './transactions') {
     } else if (filetype === '.xml') {
         return xmlParser.parseXmlFile(rawData, filename);
     }
-
 }
 
 function loadFolder(folderPath) {

@@ -8,7 +8,7 @@ function getRawTransactionsFromCsv(rawData) {
     // Returns an array of transactions. Each transaction is an array.
     const rawTransactions = rawData.split('\r\n')
             .map((transaction, index) => transaction.split(','))
-            .slice(1)
+            .slice(1);
     return rawTransactions;
 }
 

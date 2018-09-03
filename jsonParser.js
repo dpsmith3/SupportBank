@@ -6,8 +6,7 @@ const parsingFunctions = require('./parsingFunctions');
 
 function getRawTransactionsFromJson(rawData) {
     // Returns an array of transactions. Each transaction is an object.
-    const rawTransactions = JSON.parse(rawData);
-    return rawTransactions;
+    return JSON.parse(rawData);
 }
 
 function parseJsonTransaction(transaction) { 
