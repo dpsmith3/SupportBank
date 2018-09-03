@@ -25,8 +25,7 @@ function parseFile(rawData, filename, getRawTransactionsCallback, parseTransacti
     const validTransactions = [];
     const rawTransactions = getRawTransactionsCallback(rawData);
     rawTransactions.forEach((transaction, index) => {
-        let parsedTransaction;
-        parsedTransaction = parseTransactionCallback(transaction);
+        const parsedTransaction = parseTransactionCallback(transaction);
         const errValue = checkForTransactionError(parsedTransaction.result);
         if (errValue === null) {
             validTransactions.push(parsedTransaction.result);
