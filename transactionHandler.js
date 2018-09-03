@@ -27,58 +27,19 @@ Amount: ${this.amount}`;
     }
 }
 
-function validateTransaction(parsedTransaction, transactionNumber, filename) {
-    let err;
-    if (!parsedTransaction.date.isValid()) {
-        err = 'Invalid date';
-    } else if (!typeof parsedTransaction.from === 'string') {
-        err = 'Invalid "to" name';
-    } else if (!typeof parsedTransaction.to === 'string') {
-        err = 'Invalid "from" name';
-    } else if (!typeof parsedTransaction.narrative === 'string') {
-        err = 'Invalid description';
-    } else if (Number.isNaN(parsedTransaction.amount)) {
-        err = 'Invalid amount';
-    }
-
-    if (err) {
-        throw new Error(`${err} in transaction ${transactionNumber} in ${filename}.`);
-    } else {
-        return parsedTransaction;    
-    }
-}
-
-function getTransactions(rawData, filename, parseFile, parseTransaction) {
-    const rawTransactions = parseFile(rawData);
-    const transactions = rawTransactions.map((transaction, index) => {
-        try {
-            return parseTransaction(transaction, index, filename);
-        } catch (err) {
-            logger.error(err);
-            console.log(`${err.message} This transaction has not been loaded.`);
-            return null;
-        }
-    });
-    return transactions.filter(Boolean);
-}
-
+// TO DO:
 function importFile(filename, folderPath = './transactions') {
     logger.info(`Loading file ${folderPath}/${filename}`);
     const rawData = fs.readFileSync(`${folderPath}/${filename}`, "utf8");
     const filetype = path.extname(filename);
-    let parseFile, parseTransaction;
     if (filetype === '.csv') {
-        parseFile = csvParser.getRawTransactionsFromCsv;
-        parseTransaction = csvParser.parseCsvTransaction;
+        return csvParser.parseCsvFile(rawData, filename);
     } else if (filetype === '.json') {
-        parseFile = jsonParser.getRawTransactionsFromJson;
-        parseTransaction = jsonParser.parseJsonTransaction;
+        return jsonParser.parseJsonFile(rawData, filename);
     } else if (filetype === '.xml') {
-        parseFile = xmlParser.getRawTransactionsFromXml;
-        parseTransaction = xmlParser.parseXmlTransaction;
+        return xmlParser.parseXmlFile(rawData, filename);
     }
-    const transactions = getTransactions(rawData, filename, parseFile, parseTransaction)
-    return transactions;
+
 }
 
 function loadFolder(folderPath) {
@@ -96,4 +57,3 @@ function loadFolder(folderPath) {
 exports.importFile = importFile;
 exports.loadFolder = loadFolder;
 exports.Transaction = Transaction;
-exports.validateTransaction = validateTransaction;
