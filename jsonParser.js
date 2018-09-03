@@ -2,27 +2,39 @@ const moment = require('moment');
 const log4js = require('log4js');
 const logger = log4js.getLogger('jsonParser');
 const transactionHandler = require('./transactionHandler');
+const parsingFunctions = require('./parsingFunctions');
 
-// // TO DO: rewrite using generic parseFile helper function.
-
-function parseJsonFile() {
-
+function getRawTransactionsFromJson(rawData) {
+    // Returns an array of transactions. Each transaction is an object.
+    const rawTransactions = JSON.parse(rawData);
+    return rawTransactions;
 }
 
-// function getRawTransactionsFromJson(rawData) {
-//     const rawTransactions = JSON.parse(rawData);
-//     return rawTransactions;
-// }
+function parseJsonTransaction(transaction) { 
+    const rawValues = {
+        date: transaction.Date,
+        from: transaction.FromAccount,
+        to: transaction.ToAccount,
+        narrative: transaction.Narrative,
+        amount: transaction.Amount
+    };
+    
+    const parsedTransaction = new transactionHandler.Transaction(
+            moment(transaction.Date, "DD-MM-YYYY"),
+            transaction.FromAccount,
+            transaction.ToAccount,
+            transaction.Narrative,
+            Number(transaction.Amount)
+        );
+    
+    return {
+        raw: rawValues,
+        result: parsedTransaction
+    };
+}
 
-// function parseJsonTransaction(transaction, transactionIndex, filename) { 
-//     const parsedTransaction = new transactionHandler.Transaction(
-//             moment(transaction.Date, "DD-MM-YYYY"),
-//             transaction.FromAccount,
-//             transaction.ToAccount,
-//             transaction.Narrative,
-//             Number(transaction.Amount)
-//         );
-//         return transactionHandler.checkForTransactionError(parsedTransaction, transactionIndex - 1, filename);
-// }
+function parseJsonFile(rawData, filename) {
+    return parsingFunctions.parseFile(rawData, filename, getRawTransactionsFromJson, parseJsonTransaction);
+}
 
 exports.parseJsonFile = parseJsonFile;

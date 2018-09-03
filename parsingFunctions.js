@@ -4,20 +4,20 @@ const logger = log4js.getLogger('parsingFunctions');
 
 function checkForTransactionError(parsedTransaction) {
     let errValue;
-        if (!parsedTransaction.date.isValid()) {
-            errValue = 'date';
-        } else if (!typeof parsedTransaction.from === 'string') {
-            errValue = 'to';
-        } else if (!typeof parsedTransaction.to === 'string') {
-            errValue = 'from';
-        } else if (!typeof parsedTransaction.narrative === 'string') {
-            errValue = 'narrative';
-        } else if (Number.isNaN(parsedTransaction.amount)) {
-            errValue = 'amount';
-        } else {
-            errValue = null;
-        }
-        return errValue;
+    if (!parsedTransaction.date.isValid()) {
+        errValue = 'date';
+    } else if (!typeof parsedTransaction.from === 'string') {
+        errValue = 'to';
+    } else if (!typeof parsedTransaction.to === 'string') {
+        errValue = 'from';
+    } else if (!typeof parsedTransaction.narrative === 'string') {
+        errValue = 'narrative';
+    } else if (Number.isNaN(parsedTransaction.amount)) {
+        errValue = 'amount';
+    } else {
+        errValue = null;
+    }
+    return errValue;
 }
 
 function parseFile(rawData, filename, getRawTransactionsCallback, parseTransactionCallback) {
@@ -25,7 +25,8 @@ function parseFile(rawData, filename, getRawTransactionsCallback, parseTransacti
     const validTransactions = [];
     const rawTransactions = getRawTransactionsCallback(rawData);
     rawTransactions.forEach((transaction, index) => {
-        const parsedTransaction = parseTransactionCallback(transaction);
+        let parsedTransaction;
+        parsedTransaction = parseTransactionCallback(transaction);
         const errValue = checkForTransactionError(parsedTransaction.result);
         if (errValue === null) {
             validTransactions.push(parsedTransaction.result);

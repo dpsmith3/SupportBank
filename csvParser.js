@@ -5,6 +5,7 @@ const transactionHandler = require('./transactionHandler');
 const parsingFunctions = require('./parsingFunctions');
 
 function getRawTransactionsFromCsv(rawData) {
+    // Returns an array of transactions. Each transaction is an array.
     const rawTransactions = rawData.split('\r\n')
             .map((transaction, index) => transaction.split(','))
             .slice(1)
