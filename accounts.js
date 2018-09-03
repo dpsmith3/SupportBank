@@ -18,20 +18,18 @@ Account: ${this.account.toFixed(2)}`;
 function getPersons(transactions) {
     const persons = [];
     transactions.forEach(transaction => {
-        // Handle new persons
-        if (!persons.map(person => person.name).includes(transaction.from)) {
-            persons.push(new Person(transaction.from, - transaction.amount));
-        } else if (!persons.map(person => person.name).includes(transaction.to)) {
-            persons.push(new Person(transaction.to, transaction.amount));
+        const fromPersonIndex = persons.findIndex(person => person.name === transaction.from);
+        if (fromPersonIndex >= 0) {
+            persons[fromPersonIndex].account -= transaction.amount;
         } else {
-            //Handle existing persons
-            persons.forEach(person => {
-                if (person.name === transaction.from) {
-                    person.account -= transaction.amount
-                } else if (person.name === transaction.to) {
-                    person.account += transaction.amount
-                }
-            })
+            persons.push(new Person(transaction.from, -transaction.amount));
+        }
+
+        const toPersonIndex = persons.findIndex(person => person.name === transaction.to);
+        if (toPersonIndex >= 0) {
+            persons[toPersonIndex].account += transaction.amount;
+        } else {
+            persons.push(new Person(transaction.to, transaction.amount));
         }
     });
     return persons;
